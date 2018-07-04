@@ -1,15 +1,19 @@
 from __future__ import unicode_literals
 
 import datetime
+import os
 
 from django.core.urlresolvers import reverse
 from django.db import models
+from django.utils.deconstruct import deconstructible
 from django.utils.encoding import python_2_unicode_compatible
 from django.utils.translation import ugettext_lazy as _
 
 from django.contrib.auth.models import User
 
 from model_utils.managers import InheritanceManager
+
+from uuid import uuid4
 
 from symposion.markdown_parser import parse
 from symposion.utils.loader import object_from_settings
@@ -18,6 +22,25 @@ from symposion.utils.loader import object_from_settings
 def speaker_model():
     default = "symposion.speakers.models.DefaultSpeaker"
     return object_from_settings("SYMPOSION_SPEAKER_MODEL", default)
+
+
+
+@deconstructible
+class UploadToPathAndRename(object):
+
+    def __init__(self, path):
+        self.sub_path = path
+
+    def __call__(self, instance, filename):
+        ext = filename.split('.')[-1]
+        # get filename
+        if instance.pk:
+            filename = '{}.{}'.format(instance.pk, ext)
+        else:
+            # set filename as random string
+            filename = '{}.{}'.format(uuid4().hex, ext)
+        # return the whole path to the file
+        return os.path.join(self.sub_path, filename)
 
 
 @python_2_unicode_compatible
@@ -41,7 +64,11 @@ class SpeakerBase(models.Model):
                                                          "markdown-cheat-sheet/target='_blank'>"
                                                          "Markdown</a>."), verbose_name=_("Biography"))
     biography_html = models.TextField(blank=True)
-    photo = models.ImageField(upload_to="speaker_photos", blank=True, verbose_name=_("Photo"))
+    photo = models.ImageField(
+        upload_to=UploadToPathAndRename('speaker_photos'),
+        blank=True,
+        verbose_name=_("Photo"),
+    )
     annotation = models.TextField(verbose_name=_("Annotation"))  # staff only
     invite_email = models.CharField(max_length=200, unique=True, null=True, db_index=True, verbose_name=_("Invite_email"))
     invite_token = models.CharField(max_length=40, db_index=True, verbose_name=_("Invite token"))
