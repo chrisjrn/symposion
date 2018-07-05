@@ -81,7 +81,7 @@ def speaker_create_staff(request, pk):
 
 
 def speaker_create_token(request, token):
-    speaker = get_object_or_404(Speaker, invite_token=token)
+    speaker = get_object_or_404(SpeakerModel, invite_token=token)
     request.session["pending-token"] = token
     if request.user.is_authenticated():
         # check for speaker profile
