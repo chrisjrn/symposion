@@ -1,3 +1,4 @@
+import re
 
 
 class ProposalProxy(object):
@@ -16,6 +17,8 @@ class ProposalProxy(object):
             return None
         elif attr == "speakers":
             return self._speakers
+        elif attr in ("description", "description_html", "abstract", "abstract_html"):
+            return Parrot(self._redact(getattr(self.__proposal__, attr)))
         else:
             return getattr(self.__proposal__, attr)
 
@@ -25,6 +28,23 @@ class ProposalProxy(object):
                 yield self.speaker
             else:
                 yield Parrot("Additional speaker " + str(i))
+
+    def _redact(self, val, replacement="REDACTED"):
+        print "REDACT"
+        print self.__proposal__.speakers()
+        full_names = [str(i) for i in self.__proposal__.speakers()]
+        individual_names = [j for i in full_names for j in i.split()]
+        print "A", val
+        val = self._replaceany(val, full_names, replacement)
+        print "B", val
+        return self._replaceany(val, individual_names, replacement)
+
+    def _replaceany(self, source, items, destination):
+        rx = re.compile(
+            "(" + "|".join(re.escape(i) for i in items) + ")", re.IGNORECASE
+        )
+        print rx.pattern
+        return rx.sub(destination, source)
 
 
 class MessageProxy(object):
