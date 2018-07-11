@@ -12,7 +12,7 @@ class Command(BaseCommand):
         ct, created = ContentType.objects.get_or_create(
             model="",
             app_label="reviews",
-            defaults={"name": "reviews"}
+            defaults={"model": "reviews"}
         )
 
         for ps in ProposalSection.objects.all():
