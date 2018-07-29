@@ -35,6 +35,10 @@ def proposals_generator(request, queryset, user_pk=None, check_speaker=True):
             if request.user in [s.user for s in obj.speakers()]:
                 continue
 
+        # Cancelled talks aren't important.
+        if obj.cancelled:
+            continue
+
         try:
             obj.result
         except ProposalResult.DoesNotExist:
