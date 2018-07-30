@@ -38,7 +38,7 @@ class ProposalProxy(object):
 
     def _replaceany(self, source, items, destination):
         rx = re.compile(
-            r"(\b" + "|".join(re.escape(i) for i in items) + r"\b)", re.IGNORECASE
+            r"\b(" + "|".join(re.escape(i) for i in items) + r")\b", re.IGNORECASE
         )
         return rx.sub(destination, source)
 
