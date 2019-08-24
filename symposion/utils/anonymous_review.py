@@ -32,7 +32,7 @@ class ProposalProxy(object):
     def _redact(self, val, replacement="REDACTED"):
         print self.__proposal__.speakers()
         full_names = [str(i) for i in self.__proposal__.speakers()]
-        individual_names = [j for i in full_names for j in i.split()]
+        individual_names = set(j for i in full_names for j in i.split()) - set(["a", "or", "and", "I"])
         val = self._replaceany(val, full_names, replacement)
         return self._replaceany(val, individual_names, replacement)
 
